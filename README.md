@@ -19,3 +19,20 @@ The `dds_bridge` node subscribes topics published by Micro XRCE-DDS Agent throug
 ### Topics subscribed by ROSbot
 
 - `/cmd_vel` [geometry_msgs/msg/Twist]
+
+## Adding new message types
+
+To add a message it is convenient to use [Fast-RTPS Gen](https://github.com/eProsima/Fast-RTPS-Gen) for code generation.
+Install the tool according to its documentation.
+To generate code for a message:
+```
+fastrtpsgen PATH_TO_MESSAGE -I MESSAGES_INSTALL_DIRECTORY
+```
+
+For `Twist` message from `geometry_msgs` package and default ROS2 Dasing installation:
+
+```
+fastrtpsgen /opt/ros/dashing/share/geometry_msgs/msg/Twist.idl -I /opt/ros/dashing/share/
+```
+
+Generated code needs to be edited, all the classes must be moved to separate namespace, otherwise they will conflict with CycloneDDS implementation.
