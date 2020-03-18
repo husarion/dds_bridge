@@ -28,6 +28,14 @@ find_package(sensor_msgs REQUIRED)
 find_package(fastcdr REQUIRED)
 find_package(fastrtps REQUIRED)
 
+message(STATUS "Configuring Twist...")
+add_library(Twist_lib src/Twist.cxx)
+target_link_libraries(Twist_lib fastcdr fastrtps)
+
+message(STATUS "Configuring Vector3...")
+add_library(Vector3_lib src/Vector3.cxx)
+target_link_libraries(Vector3_lib fastcdr fastrtps)
+
 message(STATUS "Configuring Time...")
 add_library(Time_lib src/Time.cxx)
 target_link_libraries(Time_lib fastcdr fastrtps)
@@ -43,13 +51,13 @@ target_link_libraries(BatteryState_fastrtps_lib fastcdr fastrtps)
 add_executable(test_subscriber src/subsciber_test.cpp)
 ament_target_dependencies(test_subscriber rclcpp std_msgs sensor_msgs) 
 
-add_executable(dds_cooperation src/dds_bridge.cpp src/BatteryStatePubSubTypes.cxx src/BatteryStateListener.cpp) 
-target_link_libraries(dds_cooperation fastcdr fastrtps BatteryState_fastrtps_lib Header_lib Time_lib)
-ament_target_dependencies(dds_cooperation fastcdr fastrtps rclcpp std_msgs sensor_msgs)
+add_executable(dds_bridge src/dds_bridge.cpp src/BatteryStatePubSubTypes.cxx src/BatteryStateListener.cpp src/TwistPubSubTypes.cxx) 
+target_link_libraries(dds_bridge fastcdr fastrtps BatteryState_fastrtps_lib Header_lib Time_lib Twist_lib Vector3_lib)
+ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msgs)
 
 ament_package()
 
-install(TARGETS test_subscriber dds_cooperation
+install(TARGETS test_subscriber dds_bridge
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
