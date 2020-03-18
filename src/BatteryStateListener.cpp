@@ -1,10 +1,9 @@
 #include "BatteryStateListener.h"
 
-eprosima::BatteryStateListener::BatteryStateListener(std::function<void(float)> cb)
+eprosima::BatteryStateListener::BatteryStateListener(std::function<void(eprosima::sensor_msgs::msg::BatteryState)> cb)
 {
     callback = cb;
     n_matched = 0;
-    n_msg = 0;
 }
 
 void eprosima::BatteryStateListener::onSubscriptionMatched(eprosima::fastrtps::Subscriber *sub, eprosima::fastrtps::rtps::MatchingInfo &info)
@@ -32,11 +31,7 @@ void eprosima::BatteryStateListener::onNewDataMessage(eprosima::fastrtps::Subscr
     {
         if (m_info.sampleKind == eprosima::fastrtps::rtps::ALIVE)
         {
-            // Print your structure data here.
-            ++n_msg;
-            // float v = ;
-            // std::cout << "FastRTPS battery received, count=" << batteryState.voltage() << std::endl;
-            callback(batteryState.voltage());
+            callback(batteryState);
         }
     }
 }

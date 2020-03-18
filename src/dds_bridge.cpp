@@ -50,11 +50,11 @@ public:
         poseStampedListener = new eprosima::PoseStampedListener(std::bind(&DDS_Bridge::pose_update, this, _1));
         twistPubListener = new eprosima::fastrtps::PublisherListener();
 
-        eprosima::fastrtps::SubscriberAttributes Rparam;
-        Rparam.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
-        Rparam.topic.topicDataType = batteryStatePubSubType.getName(); //Must be registered before the creation of the subscriber
-        Rparam.topic.topicName = "rt/battery";
-        battery_subscriber = eprosima::fastrtps::Domain::createSubscriber(fastrtps_participant, Rparam, static_cast<eprosima::fastrtps::SubscriberListener *>(batteryStateListener));
+        eprosima::fastrtps::SubscriberAttributes batterySubAtt;
+        batterySubAtt.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
+        batterySubAtt.topic.topicDataType = batteryStatePubSubType.getName(); //Must be registered before the creation of the subscriber
+        batterySubAtt.topic.topicName = "rt/battery";
+        battery_subscriber = eprosima::fastrtps::Domain::createSubscriber(fastrtps_participant, batterySubAtt, static_cast<eprosima::fastrtps::SubscriberListener *>(batteryStateListener));
 
         eprosima::fastrtps::SubscriberAttributes poseSubAtt;
         poseSubAtt.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
@@ -81,11 +81,28 @@ public:
     }
 
 private:
-    void battery_update(float voltage)
+    void battery_update(eprosima::sensor_msgs::msg::BatteryState fastrtps_battery_state)
     {
-        auto message = sensor_msgs::msg::BatteryState();
-        message.voltage = voltage;
-        batt_pub_->publish(message);
+        auto cyclonedds_battery_state = sensor_msgs::msg::BatteryState();
+        cyclonedds_battery_state.header.frame_id = fastrtps_battery_state.header().frame_id();
+        cyclonedds_battery_state.header.stamp.sec = fastrtps_battery_state.header().stamp().sec();
+        cyclonedds_battery_state.header.stamp.nanosec = fastrtps_battery_state.header().stamp().nanosec();
+        cyclonedds_battery_state.voltage = fastrtps_battery_state.voltage();
+        cyclonedds_battery_state.temperature = fastrtps_battery_state.temperature();
+        cyclonedds_battery_state.current = fastrtps_battery_state.current();
+        cyclonedds_battery_state.charge = fastrtps_battery_state.charge();
+        cyclonedds_battery_state.capacity = fastrtps_battery_state.capacity();
+        cyclonedds_battery_state.design_capacity = fastrtps_battery_state.design_capacity();
+        cyclonedds_battery_state.percentage = fastrtps_battery_state.percentage();
+        cyclonedds_battery_state.power_supply_status = fastrtps_battery_state.power_supply_status();
+        cyclonedds_battery_state.power_supply_health = fastrtps_battery_state.power_supply_health();
+        cyclonedds_battery_state.power_supply_technology = fastrtps_battery_state.power_supply_technology();
+        cyclonedds_battery_state.present = fastrtps_battery_state.present();
+        cyclonedds_battery_state.cell_voltage = fastrtps_battery_state.cell_voltage();
+        cyclonedds_battery_state.cell_temperature = fastrtps_battery_state.cell_temperature();
+        cyclonedds_battery_state.location = fastrtps_battery_state.location();
+        cyclonedds_battery_state.serial_number = fastrtps_battery_state.serial_number();
+        batt_pub_->publish(cyclonedds_battery_state);
     }
 
     void pose_update(eprosima::geometry_msgs::msg::PoseStamped fastrtps_pose)

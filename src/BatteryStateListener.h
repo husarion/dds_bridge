@@ -12,14 +12,13 @@ namespace eprosima
 class BatteryStateListener : public eprosima::fastrtps::SubscriberListener
 {
 public:
-    BatteryStateListener(std::function<void(float)> cb);
+    BatteryStateListener(std::function<void(eprosima::sensor_msgs::msg::BatteryState)> cb);
     ~BatteryStateListener(){};
     void onSubscriptionMatched(eprosima::fastrtps::Subscriber *sub, eprosima::fastrtps::rtps::MatchingInfo &info);
     void onNewDataMessage(eprosima::fastrtps::Subscriber *sub);
     eprosima::fastrtps::SampleInfo_t m_info;
     int n_matched;
-    int n_msg;
-    std::function<void(float)> callback;
+    std::function<void(eprosima::sensor_msgs::msg::BatteryState)> callback;
 };
 
 }
