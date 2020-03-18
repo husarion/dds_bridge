@@ -1,7 +1,6 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
 
 #include <fastrtps/participant/Participant.h>
