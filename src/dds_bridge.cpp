@@ -3,6 +3,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 
 #include <fastrtps/participant/Participant.h>
 #include <fastrtps/attributes/ParticipantAttributes.h>
@@ -16,6 +17,8 @@
 #include "BatteryStatePubSubTypes.h"
 #include "BatteryStateListener.h"
 #include "TwistPubSubTypes.h"
+#include "PoseStampedPubSubTypes.h"
+#include "PoseStampedListener.h"
 
 #include <fastrtps/Domain.h>
 
@@ -31,6 +34,8 @@ public:
     {
         count_ = 0;
         batt_pub_ = this->create_publisher<sensor_msgs::msg::BatteryState>("/cyclonedds/battery", 1);
+        pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/cyclonedds/odom", 1);
+        
         // Create RTPSParticipant
 
         eprosima::fastrtps::ParticipantAttributes PParam;
@@ -39,17 +44,25 @@ public:
 
         // //Register the type
         eprosima::fastrtps::Domain::registerType(mp_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&batteryStatePubSubType));
+        eprosima::fastrtps::Domain::registerType(mp_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&poseStampedPubSubType));
         eprosima::fastrtps::Domain::registerType(mp_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&twistPubSubType));
 
         // Create Subscriber
         batteryStateListener = new eprosima::BatteryStateListener(std::bind(&DDS_Bridge::battery_update, this, _1));
+        poseStampedListener = new eprosima::PoseStampedListener(std::bind(&DDS_Bridge::pose_update, this, _1));
         twistPubListener = new eprosima::fastrtps::PublisherListener();
 
         eprosima::fastrtps::SubscriberAttributes Rparam;
         Rparam.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
         Rparam.topic.topicDataType = batteryStatePubSubType.getName(); //Must be registered before the creation of the subscriber
         Rparam.topic.topicName = "rt/battery";
-        mp_subscriber = eprosima::fastrtps::Domain::createSubscriber(mp_participant, Rparam, static_cast<eprosima::fastrtps::SubscriberListener *>(batteryStateListener));
+        battery_subscriber = eprosima::fastrtps::Domain::createSubscriber(mp_participant, Rparam, static_cast<eprosima::fastrtps::SubscriberListener *>(batteryStateListener));
+
+        eprosima::fastrtps::SubscriberAttributes poseSubAtt;
+        poseSubAtt.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
+        poseSubAtt.topic.topicDataType = poseStampedPubSubType.getName(); //Must be registered before the creation of the subscriber
+        poseSubAtt.topic.topicName = "rt/odom";
+        pose_subscriber = eprosima::fastrtps::Domain::createSubscriber(mp_participant, poseSubAtt, static_cast<eprosima::fastrtps::SubscriberListener *>(poseStampedListener));
 
         cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/cyclonedds/cmd_vel", 1, std::bind(&DDS_Bridge::cmd_vel_callback, this, _1));
 
@@ -78,6 +91,19 @@ private:
         batt_pub_->publish(message);
     }
 
+    void pose_update(eprosima::geometry_msgs::msg::PoseStamped fastrtps_pose)
+    {
+        auto cyclonedds_pose = geometry_msgs::msg::PoseStamped();
+        cyclonedds_pose.pose.position.x = fastrtps_pose.pose().position().x();
+        cyclonedds_pose.pose.position.y = fastrtps_pose.pose().position().y();
+        cyclonedds_pose.pose.position.z = fastrtps_pose.pose().position().z();
+        cyclonedds_pose.pose.orientation.x = fastrtps_pose.pose().orientation().x();
+        cyclonedds_pose.pose.orientation.y = fastrtps_pose.pose().orientation().y();
+        cyclonedds_pose.pose.orientation.z = fastrtps_pose.pose().orientation().z();
+        cyclonedds_pose.pose.orientation.w = fastrtps_pose.pose().orientation().w();
+        pose_pub_->publish(cyclonedds_pose);
+    }
+
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     {
         RCLCPP_INFO(this->get_logger(), "CycloneDDS [/cyclonedds/cmd_vel] ==> FastRTPS [/cmd_vel] message type [geometry_msgs::msg::Twist]");
@@ -89,17 +115,21 @@ private:
     }
 
     eprosima::fastrtps::Participant *mp_participant;
-    eprosima::fastrtps::Subscriber *mp_subscriber;
+    eprosima::fastrtps::Subscriber *battery_subscriber;
+    eprosima::fastrtps::Subscriber *pose_subscriber;
     eprosima::fastrtps::Publisher *mp_publisher;
     eprosima::sensor_msgs::msg::BatteryStatePubSubType batteryStatePubSubType;
+    eprosima::geometry_msgs::msg::PoseStampedPubSubType poseStampedPubSubType;
     eprosima::geometry_msgs::msg::TwistPubSubType twistPubSubType;
     eprosima::geometry_msgs::msg::Vector3 linearMsg;
     eprosima::geometry_msgs::msg::Vector3 angularMsg;
     eprosima::geometry_msgs::msg::Twist twistMsg;
 
     eprosima::BatteryStateListener *batteryStateListener;
+    eprosima::PoseStampedListener *poseStampedListener;
     eprosima::fastrtps::PublisherListener *twistPubListener;
     rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batt_pub_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
     size_t count_;

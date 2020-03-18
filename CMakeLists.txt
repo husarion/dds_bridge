@@ -44,6 +44,22 @@ message(STATUS "Configuring Header...")
 add_library(Header_lib src/Header.cxx)
 target_link_libraries(Header_lib fastcdr fastrtps)
 
+message(STATUS "Configuring Point...")
+add_library(Point_lib src/Point.cxx)
+target_link_libraries(Point_lib fastcdr fastrtps)
+
+message(STATUS "Configuring Quaternion...")
+add_library(Quaternion_lib src/Quaternion.cxx)
+target_link_libraries(Quaternion_lib fastcdr fastrtps)
+
+message(STATUS "Configuring Pose...")
+add_library(Pose_lib src/Pose.cxx)
+target_link_libraries(Pose_lib Quaternion_lib Point_lib fastcdr fastrtps)
+
+message(STATUS "Configuring PoseStamped...")
+add_library(PoseStamped_lib src/PoseStamped.cxx)
+target_link_libraries(PoseStamped_lib Pose_lib fastcdr fastrtps)
+
 message(STATUS "Configuring BatteryState...")
 add_library(BatteryState_fastrtps_lib src/BatteryState.cxx)
 target_link_libraries(BatteryState_fastrtps_lib fastcdr fastrtps)
@@ -51,8 +67,8 @@ target_link_libraries(BatteryState_fastrtps_lib fastcdr fastrtps)
 add_executable(test_subscriber src/subsciber_test.cpp)
 ament_target_dependencies(test_subscriber rclcpp std_msgs sensor_msgs) 
 
-add_executable(dds_bridge src/dds_bridge.cpp src/BatteryStatePubSubTypes.cxx src/BatteryStateListener.cpp src/TwistPubSubTypes.cxx) 
-target_link_libraries(dds_bridge fastcdr fastrtps BatteryState_fastrtps_lib Header_lib Time_lib Twist_lib Vector3_lib)
+add_executable(dds_bridge src/dds_bridge.cpp src/BatteryStatePubSubTypes.cxx src/BatteryStateListener.cpp src/TwistPubSubTypes.cxx src/PoseStampedPubSubTypes.cxx src/PoseStampedListener.cpp)
+target_link_libraries(dds_bridge fastcdr fastrtps BatteryState_fastrtps_lib Header_lib Time_lib Twist_lib Vector3_lib PoseStamped_lib)
 ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msgs)
 
 ament_package()
