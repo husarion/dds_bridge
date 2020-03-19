@@ -66,6 +66,17 @@ message(STATUS "Configuring BatteryState...")
 add_library(BatteryState_fastrtps_lib src/BatteryState.cxx)
 target_link_libraries(BatteryState_fastrtps_lib fastcdr fastrtps)
 
+message(STATUS "Configuring Transform...")
+add_library(Transform_lib src/Transform.cxx)
+target_link_libraries(Transform_lib fastcdr fastrtps Quaternion_lib Vector3_lib)
+
+message(STATUS "Configuring TransformStamped...")
+add_library(TransformStamped_lib src/TransformStamped.cxx)
+target_link_libraries(TransformStamped_lib fastcdr fastrtps Transform_lib Header_lib)
+
+message(STATUS "Configuring TFMessage...")
+add_library(TFMessage_lib src/TFMessage.cxx)
+target_link_libraries(TFMessage_lib fastcdr fastrtps TransformStamped_lib)
 
 add_executable(test_broadcaster src/tf_broadcaster_test.cpp)
 ament_target_dependencies(test_broadcaster rclcpp  tf2_ros tf2) 
