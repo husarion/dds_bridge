@@ -4,6 +4,7 @@
 #include "sensor_msgs/msg/battery_state.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "tf2_ros/transform_broadcaster.h"
 
 #include <fastrtps/participant/Participant.h>
 #include <fastrtps/attributes/ParticipantAttributes.h>
@@ -19,6 +20,8 @@
 #include "TwistPubSubTypes.h"
 #include "PoseStampedPubSubTypes.h"
 #include "PoseStampedListener.h"
+#include "TFMessagePubSubTypes.h"
+#include "TFMessageListener.h"
 
 #include <fastrtps/Domain.h>
 
@@ -34,7 +37,7 @@ public:
     {
         batt_pub_ = this->create_publisher<sensor_msgs::msg::BatteryState>("/cyclonedds/battery", 1);
         pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/cyclonedds/odom", 1);
-
+        tf_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(this);
         // Create RTPSParticipant
         eprosima::fastrtps::ParticipantAttributes PParam;
         PParam.rtps.setName("fastrtps_participant_subscriber");
@@ -43,11 +46,13 @@ public:
         // //Register the type
         eprosima::fastrtps::Domain::registerType(fastrtps_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&batteryStatePubSubType));
         eprosima::fastrtps::Domain::registerType(fastrtps_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&poseStampedPubSubType));
+        eprosima::fastrtps::Domain::registerType(fastrtps_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&transformStampedPubSubType));
         eprosima::fastrtps::Domain::registerType(fastrtps_participant, static_cast<eprosima::fastrtps::TopicDataType *>(&twistPubSubType));
 
         // Create Subscriber
         batteryStateListener = new eprosima::BatteryStateListener(std::bind(&DDS_Bridge::battery_update, this, _1));
         poseStampedListener = new eprosima::PoseStampedListener(std::bind(&DDS_Bridge::pose_update, this, _1));
+        transformStampedListener = new eprosima::TFMessageListener(std::bind(&DDS_Bridge::transform_update, this, _1));
         twistPubListener = new eprosima::fastrtps::PublisherListener();
 
         eprosima::fastrtps::SubscriberAttributes batterySubAtt;
@@ -61,6 +66,12 @@ public:
         poseSubAtt.topic.topicDataType = poseStampedPubSubType.getName(); //Must be registered before the creation of the subscriber
         poseSubAtt.topic.topicName = "rt/odom";
         pose_subscriber = eprosima::fastrtps::Domain::createSubscriber(fastrtps_participant, poseSubAtt, static_cast<eprosima::fastrtps::SubscriberListener *>(poseStampedListener));
+
+        eprosima::fastrtps::SubscriberAttributes transformSubAtt;
+        transformSubAtt.topic.topicKind = eprosima::fastrtps::rtps::NO_KEY;
+        transformSubAtt.topic.topicDataType = transformStampedPubSubType.getName(); //Must be registered before the creation of the subscriber
+        transformSubAtt.topic.topicName = "rt/tf";
+        transform_subscriber = eprosima::fastrtps::Domain::createSubscriber(fastrtps_participant, transformSubAtt, static_cast<eprosima::fastrtps::SubscriberListener *>(transformStampedListener));
 
         cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/cyclonedds/cmd_vel", 1, std::bind(&DDS_Bridge::cmd_vel_callback, this, _1));
 
@@ -118,6 +129,31 @@ private:
         pose_pub_->publish(cyclonedds_pose);
     }
 
+    void transform_update(eprosima::tf2_msgs::msg::TFMessage fastrtps_transform_message)
+    {
+        eprosima::geometry_msgs::msg::TransformStamped fastrtps_transform;
+        for (auto i = 0u; i < fastrtps_transform_message.transforms().size(); i++)
+        {
+            if (fastrtps_transform_message.transforms()[i].child_frame_id() == "base_link" && fastrtps_transform_message.transforms()[i].header().frame_id() == "odom")
+            {
+                fastrtps_transform = fastrtps_transform_message.transforms()[i];
+            }
+        }
+        geometry_msgs::msg::TransformStamped cyclonedds_transform;
+        cyclonedds_transform.header.frame_id = fastrtps_transform.header().frame_id();
+        cyclonedds_transform.header.stamp.sec = fastrtps_transform.header().stamp().sec();
+        cyclonedds_transform.header.stamp.nanosec = fastrtps_transform.header().stamp().nanosec();
+        cyclonedds_transform.child_frame_id = fastrtps_transform.child_frame_id();
+        cyclonedds_transform.transform.translation.x = fastrtps_transform.transform().translation().x();
+        cyclonedds_transform.transform.translation.y = fastrtps_transform.transform().translation().y();
+        cyclonedds_transform.transform.translation.z = fastrtps_transform.transform().translation().z();
+        cyclonedds_transform.transform.rotation.x = fastrtps_transform.transform().rotation().x();
+        cyclonedds_transform.transform.rotation.y = fastrtps_transform.transform().rotation().y();
+        cyclonedds_transform.transform.rotation.z = fastrtps_transform.transform().rotation().z();
+        cyclonedds_transform.transform.rotation.w = fastrtps_transform.transform().rotation().w();
+        tf_broadcaster->sendTransform(cyclonedds_transform);
+    }
+
     void cmd_vel_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
     {
         linearMsg.x(msg->linear.x);
@@ -130,9 +166,11 @@ private:
     eprosima::fastrtps::Participant *fastrtps_participant;
     eprosima::fastrtps::Subscriber *battery_subscriber;
     eprosima::fastrtps::Subscriber *pose_subscriber;
+    eprosima::fastrtps::Subscriber *transform_subscriber;
     eprosima::fastrtps::Publisher *twist_publisher;
     eprosima::sensor_msgs::msg::BatteryStatePubSubType batteryStatePubSubType;
     eprosima::geometry_msgs::msg::PoseStampedPubSubType poseStampedPubSubType;
+    eprosima::tf2_msgs::msg::TFMessagePubSubType transformStampedPubSubType;
     eprosima::geometry_msgs::msg::TwistPubSubType twistPubSubType;
     eprosima::geometry_msgs::msg::Vector3 linearMsg;
     eprosima::geometry_msgs::msg::Vector3 angularMsg;
@@ -140,10 +178,12 @@ private:
 
     eprosima::BatteryStateListener *batteryStateListener;
     eprosima::PoseStampedListener *poseStampedListener;
+    eprosima::TFMessageListener *transformStampedListener;
     eprosima::fastrtps::PublisherListener *twistPubListener;
     rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batt_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+    std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster;
 };
 
 int main(int argc, char *argv[])

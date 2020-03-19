@@ -85,9 +85,27 @@ ament_target_dependencies(test_broadcaster rclcpp  tf2_ros tf2)
 add_executable(test_subscriber src/subsciber_test.cpp)
 ament_target_dependencies(test_subscriber rclcpp std_msgs sensor_msgs) 
 
-add_executable(dds_bridge src/dds_bridge.cpp src/BatteryStatePubSubTypes.cxx src/BatteryStateListener.cpp src/TwistPubSubTypes.cxx src/PoseStampedPubSubTypes.cxx src/PoseStampedListener.cpp)
-target_link_libraries(dds_bridge fastcdr fastrtps BatteryState_fastrtps_lib Header_lib Time_lib Twist_lib Vector3_lib PoseStamped_lib)
-ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msgs)
+add_executable(dds_bridge 
+    src/dds_bridge.cpp
+    src/BatteryStatePubSubTypes.cxx
+    src/BatteryStateListener.cpp
+    src/TwistPubSubTypes.cxx
+    src/PoseStampedPubSubTypes.cxx
+    src/PoseStampedListener.cpp
+    src/TFMessagePubSubTypes.cxx
+    src/TFMessageListener.cp
+    )
+
+target_link_libraries(dds_bridge
+    fastcdr
+    fastrtps
+    BatteryState_fastrtps_lib
+    Twist_lib
+    PoseStamped_lib
+    TFMessage_lib
+)
+
+ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msgs tf2_ros tf2)
 
 ament_package()
 
