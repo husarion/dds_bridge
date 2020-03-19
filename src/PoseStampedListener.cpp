@@ -14,12 +14,12 @@ void eprosima::PoseStampedListener::onSubscriptionMatched(eprosima::fastrtps::Su
     if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
     {
         n_matched++;
-        std::cout << "Subscriber matched" << std::endl;
+        std::cout << "PoseStamped subscriber matched" << std::endl;
     }
     else
     {
         n_matched--;
-        std::cout << "Subscriber unmatched" << std::endl;
+        std::cout << "PoseStamped Subscriber unmatched" << std::endl;
     }
 }
 

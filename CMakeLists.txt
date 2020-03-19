@@ -30,13 +30,14 @@ find_package(fastrtps REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 
-message(STATUS "Configuring Twist...")
-add_library(Twist_lib src/Twist.cxx)
-target_link_libraries(Twist_lib fastcdr fastrtps)
 
 message(STATUS "Configuring Vector3...")
 add_library(Vector3_lib src/Vector3.cxx)
 target_link_libraries(Vector3_lib fastcdr fastrtps)
+
+message(STATUS "Configuring Twist...")
+add_library(Twist_lib src/Twist.cxx)
+target_link_libraries(Twist_lib Vector3_lib fastcdr fastrtps)
 
 message(STATUS "Configuring Time...")
 add_library(Time_lib src/Time.cxx)
@@ -44,7 +45,7 @@ target_link_libraries(Time_lib fastcdr fastrtps)
 
 message(STATUS "Configuring Header...")
 add_library(Header_lib src/Header.cxx)
-target_link_libraries(Header_lib fastcdr fastrtps)
+target_link_libraries(Header_lib fastcdr fastrtps Time_lib)
 
 message(STATUS "Configuring Point...")
 add_library(Point_lib src/Point.cxx)

@@ -13,12 +13,12 @@ void eprosima::BatteryStateListener::onSubscriptionMatched(eprosima::fastrtps::S
     if (info.status == eprosima::fastrtps::rtps::MATCHED_MATCHING)
     {
         n_matched++;
-        std::cout << "Subscriber matched" << std::endl;
+        std::cout << "BatteryState subscriber matched" << std::endl;
     }
     else
     {
         n_matched--;
-        std::cout << "Subscriber unmatched" << std::endl;
+        std::cout << "BatteryState subscriber unmatched" << std::endl;
     }
 }
 
