@@ -27,6 +27,8 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(fastcdr REQUIRED)
 find_package(fastrtps REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
 
 message(STATUS "Configuring Twist...")
 add_library(Twist_lib src/Twist.cxx)
@@ -64,6 +66,10 @@ message(STATUS "Configuring BatteryState...")
 add_library(BatteryState_fastrtps_lib src/BatteryState.cxx)
 target_link_libraries(BatteryState_fastrtps_lib fastcdr fastrtps)
 
+
+add_executable(test_broadcaster src/tf_broadcaster_test.cpp)
+ament_target_dependencies(test_broadcaster rclcpp  tf2_ros tf2) 
+
 add_executable(test_subscriber src/subsciber_test.cpp)
 ament_target_dependencies(test_subscriber rclcpp std_msgs sensor_msgs) 
 
@@ -73,7 +79,7 @@ ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msg
 
 ament_package()
 
-install(TARGETS test_subscriber dds_bridge
+install(TARGETS test_subscriber dds_bridge test_broadcaster
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
