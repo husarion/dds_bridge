@@ -93,7 +93,7 @@ add_executable(dds_bridge
     src/PoseStampedPubSubTypes.cxx
     src/PoseStampedListener.cpp
     src/TFMessagePubSubTypes.cxx
-    src/TFMessageListener.cp
+    src/TFMessageListener.cpp
     )
 
 target_link_libraries(dds_bridge
