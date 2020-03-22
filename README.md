@@ -82,3 +82,39 @@ Build with colcon:
 ```
 colcon build
 ```
+
+# Using with ROSbot image
+
+The `dds_bridge` comes preinstalled on image for ROSbot 2.0 along with `CycloneDDS` and other required packages.
+
+Download it from [here](https://husarion-files.s3-eu-west-1.amazonaws.com/ros-dashing-arm-2020-03-22.img.tar.gz) and flash onto a micro SD-card following [system reinstallation manual](https://husarion.com/manuals/rosbot-manual/#rosbot-20).
+
+Before using `Cyclone DDS`, you need to configure it:
+
+- open `cyclonedds.xml` file in home directory:
+    ```
+    nano ~/cyclonedds.xml
+    ```
+Find line
+    ```
+    <NetworkInterfaceAddress></NetworkInterfaceAddress>
+    ```
+And place IPv6 address of your ROSbot between `NetworkInterfaceAddress` tags.
+
+Then find section `<Peers>` and add `<Peer>` entry for every device you want to use including ROSbot.
+Each entry should have `address` property with IPv6 address beteen brackets.
+    ```
+    <Peers>
+        <Peer address="[]"/>
+    </Peers>
+    ```
+
+You can now start using ROSbot with Cyclone DDS.
+- In one terminal start `MicroXRCEAgent`:
+    ```
+    sudo MicroXRCEAgent serial --dev /dev/ttyS1 -b 500000
+    ```
+- In second terminal start `dds_bridge`:
+    ```
+    ros2 run dds_bridge dds_bridge
+    ```
