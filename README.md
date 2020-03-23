@@ -22,17 +22,12 @@ Before using `Cyclone DDS`, you need to configure it:
     ```
     nano ~/cyclonedds.xml
     ```
-Find line
-    ```
-    <NetworkInterfaceAddress></NetworkInterfaceAddress>
-    ```
-And place IPv6 address of your ROSbot between `NetworkInterfaceAddress` tags.
 
-Then find section `<Peers>` and add `<Peer>` entry for every device you want to use including ROSbot.
+Find section `<Peers>` and add `<Peer>` entry for every device you want to use. ROSbot's address is already mapped as localhost: `::1`.
 Each entry should have `address` property with IPv6 address beteen brackets.
     ```
     <Peers>
-        <Peer address="[]"/>
+        <Peer address="[::1]"/>
     </Peers>
     ```
 
