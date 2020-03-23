@@ -107,9 +107,12 @@ target_link_libraries(dds_bridge
 
 ament_target_dependencies(dds_bridge fastcdr fastrtps rclcpp std_msgs sensor_msgs tf2_ros tf2)
 
+add_executable(rosbot_time_publisher src/rosbot_time_publisher.cpp)
+ament_target_dependencies(rosbot_time_publisher rclcpp) 
+
 ament_package()
 
-install(TARGETS test_subscriber dds_bridge test_broadcaster
+install(TARGETS test_subscriber dds_bridge test_broadcaster rosbot_time_publisher
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
