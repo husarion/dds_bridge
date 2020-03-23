@@ -21,7 +21,7 @@ private:
     void timer_callback()
     {
         *current_time = this->now();
-        publisher_->publish(current_time);
+        publisher_->publish(*current_time);
     }
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<builtin_interfaces::msg::Time>::SharedPtr publisher_;
