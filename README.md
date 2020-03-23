@@ -16,20 +16,37 @@ The `dds_bridge` comes preinstalled on image for ROSbot 2.0 along with `CycloneD
 
 Download it from [here](https://husarion-files.s3-eu-west-1.amazonaws.com/ros-dashing-arm-2020-03-23.img.tar.gz) and flash onto a micro SD-card following [system reinstallation manual](https://husarion.com/manuals/rosbot-manual/#rosbot-20).
 
+## Flashing the CORE2 firmware
+
+Working with ROS2 requires compatible firmware for CORE2 controller. It is already in the image, but it must be flashed.
+To flash the CORE2 firmware use `flash_firmware.sh` script:
+
+```
+cd /home/husarion
+./flash_firmware.sh
+```
+
+## CycloneDDS configuration
+
 Before using `Cyclone DDS`, you need to configure it:
 
 - open `cyclonedds.xml` file in home directory:
+
     ```
     nano ~/cyclonedds.xml
     ```
 
 Find section `<Peers>` and add `<Peer>` entry for every device you want to use. ROSbot's address is already mapped as localhost: `::1`.
+
 Each entry should have `address` property with IPv6 address beteen brackets.
+
     ```
     <Peers>
         <Peer address="[::1]"/>
     </Peers>
     ```
+
+## Start communication
 
 You can now start using ROSbot with Cyclone DDS.
 - In one terminal start `MicroXRCEAgent`:
