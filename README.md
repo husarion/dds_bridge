@@ -87,7 +87,7 @@ colcon build
 
 The `dds_bridge` comes preinstalled on image for ROSbot 2.0 along with `CycloneDDS` and other required packages.
 
-Download it from [here](https://husarion-files.s3-eu-west-1.amazonaws.com/ros-dashing-arm-2020-03-22.img.tar.gz) and flash onto a micro SD-card following [system reinstallation manual](https://husarion.com/manuals/rosbot-manual/#rosbot-20).
+Download it from [here](https://husarion-files.s3-eu-west-1.amazonaws.com/ros-dashing-arm-2020-03-23.img.tar.gz) and flash onto a micro SD-card following [system reinstallation manual](https://husarion.com/manuals/rosbot-manual/#rosbot-20).
 
 Before using `Cyclone DDS`, you need to configure it:
 
