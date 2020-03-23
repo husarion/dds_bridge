@@ -119,6 +119,9 @@ private:
     void pose_update(eprosima::geometry_msgs::msg::PoseStamped fastrtps_pose)
     {
         auto cyclonedds_pose = geometry_msgs::msg::PoseStamped();
+        cyclonedds_pose.header.frame_id = fastrtps_pose.header().frame_id();
+        cyclonedds_pose.header.stamp.sec = fastrtps_pose.header().stamp().sec();
+        cyclonedds_pose.header.stamp.nanosec = fastrtps_pose.header().stamp().nanosec();
         cyclonedds_pose.pose.position.x = fastrtps_pose.pose().position().x();
         cyclonedds_pose.pose.position.y = fastrtps_pose.pose().position().y();
         cyclonedds_pose.pose.position.z = fastrtps_pose.pose().position().z();
