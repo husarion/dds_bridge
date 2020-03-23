@@ -12,7 +12,7 @@ The `dds_bridge` node subscribes topics published by Micro XRCE-DDS Agent throug
 
 ### Topics published by ROSbot
 
-- `//tf` [geometry_msgs/msg/TransformStamped]
+- `/tf` [tf2_msgs/msg/TFMessage]
 - `/battery` [sensor_msgs/msg/BatteryState]
 - `/odom` [geometry_msgs/msg/PoseStamped]
 
@@ -118,3 +118,51 @@ You can now start using ROSbot with Cyclone DDS.
     ```
     ros2 run dds_bridge dds_bridge
     ```
+
+## ROS2 API
+
+You can access ROSbot interfaces through IPv4 or IPv6 network interfaces.
+
+### IPv4
+
+ROSbot interfaces are being handled by `MicroXRCEAgent`, this node is directly communicating with CORE2 board on one side and IPv4 network on the other side.
+
+Below topics are available in ROSbot:
+
+| Topic | Message type | Direction | Node |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+| --- | --- | --- | --- | --- |
+| `/battery` | `sensor_msgs/msg/BatteryState` | publisher | `MicroXRCEAgent` | Battery voltage |
+| `/odom` | `geometry_msgs/msg/PoseStamped` | publisher | `MicroXRCEAgent` | Odometry based on wheel encoders |
+| `/tf` | `tf2_msgs/msg/TFMessage` | publisher | `MicroXRCEAgent` | ROSbot position based on wheel encoders |
+| `/cmd_vel` | `geometry_msgs/msg/Twist` | subscriber | `MicroXRCEAgent` | Velocity commands |
+
+### IPv6
+
+The interefaces from IPv4 are translated to IPv6 by `dds_bridge`. Thier summary is below:
+
+| Topic | Message type | Direction | Node |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
+| --- | --- | --- | --- | --- |
+| `/cyclonedds/battery` | `sensor_msgs/msg/BatteryState` | publisher | `dds_bridge` | Battery voltage |
+| `/cyclonedds/odom` | `geometry_msgs/msg/PoseStamped` | publisher | `dds_bridge` | Odometry based on wheel encoders |
+| `/tf` | `tf2_msgs/msg/TFMessage` | publisher | `dds_bridge` | ROSbot position based on wheel encoders |
+| `/cyclonedds/cmd_vel` | `geometry_msgs/msg/Twist` | subscriber | `dds_bridge` | Velocity commands |
+
+### Controlling the ROSbot
+
+To send drive commands you can use `teleop_twist_keyboard`, for issuing commands over IPv4 interface:
+
+```
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+
+And for issuing commands over IPv6 interface:
+
+```
+ros2 run teleop_twist_keyboard teleop_twist_keyboard /cmd_vel:=/cyclonedds/cmd_vel
+```
+
+### External documentation
+
+ - Orbbec Astra camera API is documented in [driver repository](https://github.com/lukaszmitka/ros_astra_camera)
+
+ - Slamtec RpLidar scanner API is documented in [driver repository](https://github.com/lukaszmitka/rplidar_ros)
