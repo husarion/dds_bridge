@@ -12,7 +12,7 @@ public:
     ROSbotTimePublisher() : Node("time_publisher")
     {
         publisher_ = this->create_publisher<builtin_interfaces::msg::Time>("/rosbot_time", 1);
-        timer_ = this->create_wall_timer(20ms, std::bind(&ROSbotTimePublisher::timer_callback, this));
+        timer_ = this->create_wall_timer(1000ms, std::bind(&ROSbotTimePublisher::timer_callback, this));
         current_time = new builtin_interfaces::msg::Time();
         RCLCPP_INFO(this->get_logger(), "Clock publisher initilized");
     }
