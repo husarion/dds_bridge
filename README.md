@@ -161,6 +161,15 @@ And for issuing commands over IPv6 interface:
 ros2 run teleop_twist_keyboard teleop_twist_keyboard /cmd_vel:=/cyclonedds/cmd_vel
 ```
 
+# Timestapms
+
+By default CORE is measuring time since reset, thus timestapms are published the same.
+If you want to use system time, use `rosbot_time_publisher` node:
+
+```
+RMW_IMPLEMENTATION=rmw_fastrtps_cpp ros2 run dds_bridge rosbot_time_publisher
+```
+
 ### External documentation
 
  - Orbbec Astra camera API is documented in [driver repository](https://github.com/lukaszmitka/ros_astra_camera)
