@@ -104,10 +104,10 @@ The interefaces from IPv4 are translated to IPv6 by `dds_bridge`. Thier summary 
 
 | Topic | Message type | Direction | Node |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|
 | --- | --- | --- | --- | --- |
-| `/cyclonedds/battery` | `sensor_msgs/msg/BatteryState` | publisher | `dds_bridge` | Battery voltage |
-| `/cyclonedds/odom` | `geometry_msgs/msg/PoseStamped` | publisher | `dds_bridge` | Odometry based on wheel encoders |
+| `/battery` | `sensor_msgs/msg/BatteryState` | publisher | `dds_bridge` | Battery voltage |
+| `/odom` | `geometry_msgs/msg/PoseStamped` | publisher | `dds_bridge` | Odometry based on wheel encoders |
 | `/tf` | `tf2_msgs/msg/TFMessage` | publisher | `dds_bridge` | ROSbot position based on wheel encoders |
-| `/cyclonedds/cmd_vel` | `geometry_msgs/msg/Twist` | subscriber | `dds_bridge` | Velocity commands |
+| `/cmd_vel` | `geometry_msgs/msg/Twist` | subscriber | `dds_bridge` | Velocity commands |
 
 ### External documentation
 

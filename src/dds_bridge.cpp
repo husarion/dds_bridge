@@ -35,8 +35,8 @@ public:
     DDS_Bridge()
         : Node("dds_bridge")
     {
-        batt_pub_ = this->create_publisher<sensor_msgs::msg::BatteryState>("/cyclonedds/battery", 1);
-        pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/cyclonedds/odom", 1);
+        batt_pub_ = this->create_publisher<sensor_msgs::msg::BatteryState>("/battery", 1);
+        pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/odom", 1);
         tf_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(this);
         // Create RTPSParticipant
         eprosima::fastrtps::ParticipantAttributes PParam;
@@ -73,7 +73,7 @@ public:
         transformSubAtt.topic.topicName = "rt/tf";
         transform_subscriber = eprosima::fastrtps::Domain::createSubscriber(fastrtps_participant, transformSubAtt, static_cast<eprosima::fastrtps::SubscriberListener *>(transformStampedListener));
 
-        cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/cyclonedds/cmd_vel", 1, std::bind(&DDS_Bridge::cmd_vel_callback, this, _1));
+        cmd_vel_sub_ = this->create_subscription<geometry_msgs::msg::Twist>("/cmd_vel", 1, std::bind(&DDS_Bridge::cmd_vel_callback, this, _1));
 
         //CREATE THE PUBLISHER
         linearMsg.x(0);
