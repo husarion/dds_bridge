@@ -5,7 +5,7 @@
   <version>0.0.1</version>
   <description>Package which allows to translate messeges between FastRTPS working in IPv4 network and CycloneDDS working in IPv6 network.</description>
   <maintainer email="lukasz.mitka@husarion.com">Łukasz Mitka</maintainer>
-  <license>MIT</license>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>fastcdr</buildtool_depend>
